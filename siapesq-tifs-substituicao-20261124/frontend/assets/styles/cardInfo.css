@@ -1,0 +1,54 @@
+@layer cardInfo {
+  .categories {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    height: 90px;
+    row-gap: 10px;
+    flex: 0 0 calc(20% - 4px);
+    padding: 20px;
+
+    font-family: "Inter", sans-serif;
+    border-radius: 2px;
+    box-shadow: 1px 1px 5px 0px #0000001f;
+  }
+
+  .categories:hover {
+    transform: scale(1.04);
+    transition: all ease-in-out 0.2s;
+    box-shadow: 1px 1px 5px 0px #00000043;
+  }
+
+  .slider {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 50px;
+    width: 100%;
+
+    transition: all 600ms ease-in-out;
+
+    overflow-x: scroll;
+    scrollbar-width: none;
+  }
+
+  .slider img {
+    flex: 0 0 31%;
+  }
+
+  .infoContainer {
+    font-family: "Open Sans", sans-serif;
+  }
+
+  .infosList {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .infosList img {
+    /* width: 16px; */
+    /* height: 16px; */
+  }
+}

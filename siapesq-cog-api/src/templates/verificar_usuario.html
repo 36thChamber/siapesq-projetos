@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confirmação de Conta SIAPESQ</title>
+    <style>
+      @media only screen and (max-width: 620px) {
+        table[class="body"] h1 {
+          font-size: 22px !important;
+          margin-bottom: 12px !important;
+        }
+        table[class="body"] p,
+        table[class="body"] td,
+        table[class="body"] a {
+          font-size: 15px !important;
+        }
+        table[class="body"] .container {
+          padding: 0 !important;
+          width: 100% !important;
+        }
+        table[class="body"] .main {
+          border-radius: 0 !important;
+        }
+        table[class="body"] .wrapper {
+          padding: 16px !important;
+        }
+        table[class="body"] .btn a {
+          display: block !important;
+          width: 100% !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #eaebed;
+      font-family: 'Poppins', Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    "
+  >
+    <table
+      role="presentation"
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      width="100%"
+      bgcolor="#eaebed"
+      style="background-color: #eaebed; width: 100%;"
+    >
+      <tr>
+        <td align="center" style="padding: 30px 10px;">
+          <table
+            role="presentation"
+            border="0"
+            cellpadding="0"
+            cellspacing="0"
+            width="580"
+            style="
+              width: 580px;
+              max-width: 580px;
+              background-color: #ffffff;
+              border-radius: 6px;
+            "
+          >
+            <!-- LOGO -->
+            <tr>
+              <td align="center" style="padding: 24px 20px 8px 20px;">
+                <a href="https://api.example.invalid/" target="_blank" style="text-decoration: none;">
+                  <img
+                    src="https://dl.dropboxusercontent.com/scl/fi/ydu4i5vuumth0unbx3pr1/siapesq_logo.png?rlkey=hg17gd2vwhlugtiz3c3gpopft&st=p0t5vvl7&dl=0"
+                    alt="SIAPESQ"
+                    width="400"
+                    height="100"
+                    style="
+                      display: block;
+                      width: 400px;
+                      max-width: 66%;
+                      height: auto;
+                      border: none;
+                    "
+                  />
+                </a>
+              </td>
+            </tr>
+
+            <!-- CONTEÚDO -->
+            <tr>
+              <td style="padding: 16px 32px 32px 32px;">
+                <h1
+                  style="
+                    margin: 0 0 20px 0;
+                    font-family: 'Poppins', Arial, sans-serif;
+                    font-size: 22px;
+                    font-weight: bold;
+                    color: #06090f;
+                    text-align: center;
+                  "
+                >
+                  Validação do E-mail
+                </h1>
+
+                <p style="margin: 0 0 16px 0; color: #444444;">
+                  Olá, <strong>{{nome}}</strong>!
+                </p>
+
+                <p style="margin: 0 0 16px 0; color: #444444;">
+                  Recebemos um pedido de confirmação de conta no
+                  <strong>SIAPESQ</strong>. Para ativar seu acesso, valide seu
+                  e-mail clicando no botão abaixo.
+                </p>
+
+                <!-- BOTÃO -->
+                <table
+                  role="presentation"
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  width="100%"
+                  style="margin: 24px 0;"
+                >
+                  <tr>
+                    <td align="center">
+                      <a
+                        href="{{verificationUrl}}"
+                        target="_blank"
+                        style="
+                          display: inline-block;
+                          background-color: #2d81af;
+                          border: 1px solid #2d81af;
+                          border-radius: 5px;
+                          color: #ffffff;
+                          font-family: 'Poppins', Arial, sans-serif;
+                          font-size: 15px;
+                          font-weight: bold;
+                          text-decoration: none;
+                          padding: 12px 28px;
+                          text-transform: uppercase;
+                        "
+                      >
+                        Confirmar E-mail
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin: 0 0 8px 0; color: #444444;">
+                  Se o botão não funcionar, copie e cole este link no navegador:
+                </p>
+
+                <p
+                  style="
+                    margin: 0 0 24px 0;
+                    font-size: 12px;
+                    color: #2d81af;
+                    word-break: break-all;
+                  "
+                >
+                  <a
+                    href="{{verificationUrl}}"
+                    target="_blank"
+                    style="color: #2d81af; text-decoration: underline;"
+                  >
+                    {{verificationUrl}}
+                  </a>
+                </p>
+
+                <p style="margin: 0 0 8px 0; color: #444444;">
+                  Se você não solicitou este cadastro, ignore esta mensagem.
+                  Nenhuma ação é necessária.
+                </p>
+
+                <p style="margin: 0; color: #444444;">
+                  A equipe SIAPESQ agradece. :)
+                </p>
+              </td>
+            </tr>
+
+            <!-- FOOTER -->
+            <tr>
+              <td
+                align="center"
+                style="
+                  padding: 16px 24px 24px 24px;
+                  border-top: 1px solid #eeeeee;
+                  font-size: 12px;
+                  color: #9a9ea6;
+                "
+              >
+                <p style="margin: 0 0 6px 0; color: #9a9ea6;">
+                  SIAPESQ — Inovação em Rastreabilidade e Modelagem Ecológica
+                </p>
+                <p style="margin: 0; color: #9a9ea6;">
+                  &copy; SIAPESQ. Todos os direitos reservados.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

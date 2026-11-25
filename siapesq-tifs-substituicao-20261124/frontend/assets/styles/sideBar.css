@@ -1,0 +1,54 @@
+@layer sideBar {
+  .sideBarButton,
+  .sideBarCloseButton {
+    display: none;
+    width: auto;
+  }
+
+  @media screen and (max-width: 480px) {
+    .sideBarButton {
+      display: block;
+      /* flex-flow: row nowrap; */
+
+      background-color: white !important;
+
+      border-radius: 5px;
+      padding: 5px 10px !important;
+
+      width: 100%;
+      height: auto;
+    }
+
+    .sideBar {
+      display: none;
+      position: relative;
+    }
+
+    .sideBarCloseButton {
+      display: block;
+      position: absolute;
+      right: 20px;
+      top: 10px;
+
+      z-index: 100000;
+    }
+
+    .sideBarOpen {
+      display: block;
+      position: fixed;
+      left: 0;
+      top: 59px;
+      width: 75%;
+      height: 100%;
+      border-radius: 0;
+      box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+      background-color: white;
+      z-index: 100;
+
+      padding: 1rem;
+      padding-top: 2rem;
+
+      transition: all ease-in-out 0.5ms;
+    }
+  }
+}

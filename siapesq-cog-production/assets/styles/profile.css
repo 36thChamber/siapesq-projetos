@@ -1,0 +1,78 @@
+@layer profile{
+    .containerProfile{
+        padding: 0 40px;
+        margin-top: 10px;
+        display: flex;
+        flex-flow: row nowrap;
+        width: 100%;
+        background-color: #fafafa;
+    }
+    
+    .textContainerP {
+        width: 800px;
+        min-height: 300px;
+        box-shadow: 0px 1px 10px rgba(0,0,0,0.10);
+        border-radius: 5px;
+        border: 1px solid rgba(0,0,0,0.1);
+        padding: 40px 40px 20px 40px;
+        background-color: white;
+    }
+    
+    .containerProfile .aside{
+        flex: 1 1 10%;
+
+        position: relative;
+
+        /* height: 100vh; */
+
+        display: flex;
+        align-items: start;
+    }
+
+    .containerProfile .aside .navProfile{
+        position: sticky;
+        height: fit-content;
+        top: 40%;
+    }
+
+    .containerProfile .content{
+        flex: 1 1 90%;
+        min-height: 100%;
+        padding: 20px 0px 40px 0px;
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: center;
+        align-items: center;
+        row-gap: 50px;
+    }
+
+    .navProfile {
+        /* color: #565656; */
+        display: flex;
+        flex-flow: column nowrap;
+        row-gap: 1rem;
+    }
+
+    .personInfo .infoLigth{
+        color: #9B9B9B;
+        font-weight: 400;
+        text-align: center;
+    }
+
+    .textContainerP a.privacityLink{
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        width: 100%;
+        padding: 15px 10px;
+        border-radius: 5px;
+    }
+
+    .textContainerP a.privacityLink:hover{
+        background-color: #fafafa;
+    }
+
+    .containerProfile .aside .navProfile a.links{
+        color: #565656;
+    }
+}

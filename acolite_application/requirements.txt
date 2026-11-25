@@ -1,0 +1,16 @@
+python-dotenv
+gdal==3.6.4 # depende da versão do gdal instalada no sistema (3.7.1)
+rasterio
+scipy
+numpy
+netCDF4
+pandas
+packaging
+rioxarray
+xarray
+pyproj
+openeo
+turfpy
+geojson
+discord
+sentinelhub

@@ -1,0 +1,36 @@
+@layer login {
+  @media screen and (max-width: 768px) {
+    .loginContainer {
+      gap: 0;
+    }
+
+    .loginContainer .clipPath {
+      /* display: none; */
+
+      aspect-ratio: 4.282;
+      clip-path: shape(
+        from 97.77% 60.83%,
+        curve to 3.42% 68.35% with 66.15% -10.03%/59.81% 169.35%,
+        curve to 0.26% 62.61% with 2.34% 66.4%/1.28% 64.49%,
+        line to 0% 0%,
+        curve to 100% 9.97% with 39.04% 5.38%/60.91% 12.2%,
+        line to 100% 65.65%,
+        curve to 97.77% 60.83% with 99.28% 64.15%/98.53% 62.54%,
+        close
+      );
+
+      background: linear-gradient(#18a7b3, #308fcb, #85bd51);
+      height: 40px;
+      width: 100%;
+
+      position: relative;
+      top: -10px;
+    }
+
+    .clipPath:last-of-type {
+      transform: rotateX(-180deg);
+      top: auto;
+      bottom: -10px;
+    }
+  }
+}

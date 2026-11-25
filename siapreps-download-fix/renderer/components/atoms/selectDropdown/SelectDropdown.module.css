@@ -1,0 +1,27 @@
+.customTooltipContainer {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+  }
+  
+  .customTooltip {
+    position: relative;
+  }
+  
+  .customTooltip:hover {
+    content: "teste";
+  }
+  
+  .customTooltipMessage {
+
+    position: absolute;
+    background-color: #000000bd;
+    color: #eee5e5;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 13px;
+    left: calc(100% + 5px);
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;  }
+  

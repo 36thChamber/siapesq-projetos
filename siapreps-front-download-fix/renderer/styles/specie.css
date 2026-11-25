@@ -1,0 +1,15 @@
+.description-container {
+  @apply flex flex-col gap-y-2;
+}
+
+.description {
+  @apply font-poppins w-2xl;
+}
+
+.description-text {
+  @apply text-justify;
+}
+
+.description-title {
+  @apply font-medium inline-block mr-2;
+}

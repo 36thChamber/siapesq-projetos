@@ -1,0 +1,73 @@
+@layer register {
+  .registerContainer {
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .register-label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .register-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.875rem;
+    color: #111827;
+    background-color: #ffffff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    appearance: auto;
+  }
+
+  .register-input:focus {
+    border-color: #2589BD;
+    box-shadow: 0 0 0 3px rgba(37, 137, 189, 0.12);
+  }
+
+  .register-input::placeholder {
+    color: #9CA3AF;
+    font-weight: 400;
+  }
+
+  .register-input.error {
+    border-color: #E45858;
+    box-shadow: 0 0 0 3px rgba(228, 88, 88, 0.1);
+  }
+
+  @media screen and (max-width: 768px) {
+    .registerContainer {
+      flex-flow: column;
+      background: none;
+    }
+
+    .registerContainer .clipPath {
+      aspect-ratio: 4.282;
+      clip-path: shape(
+        from 97.77% 60.83%,
+        curve to 3.42% 68.35% with 66.15% -10.03%/59.81% 169.35%,
+        curve to 0.26% 62.61% with 2.34% 66.4%/1.28% 64.49%,
+        line to 0% 0%,
+        curve to 100% 9.97% with 39.04% 5.38%/60.91% 12.2%,
+        line to 100% 65.65%,
+        curve to 97.77% 60.83% with 99.28% 64.15%/98.53% 62.54%,
+        close
+      );
+
+      background: linear-gradient(#18a7b3, #308fcb, #85bd51);
+      height: 40px;
+      width: 101%;
+      position: relative;
+      top: -10px;
+    }
+
+    .registerContainer .clipPath:last-of-type {
+      top: 0rem;
+    }
+  }
+}

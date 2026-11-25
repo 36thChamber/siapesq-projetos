@@ -1,0 +1,157 @@
+/* app/globals.css */
+@import "tailwindcss";
+@import "./login.css";
+@import "./specie.css";
+@import "./home.css";
+@import "./sideBar.css";
+
+@theme {
+  --color-dark_green: #006767;
+  --color-light_green: #daf6f4;
+  --color-green_approved: #86bd51;
+  --color-yellow_pedant: #ffc05b;
+  --color-red_failed: #e45858;
+
+  --font-poppins: var(--font-poppins), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans",
+    sans-serif;
+}
+html {
+  font-family: var(--font-sans);
+}
+
+/* Definição para fundo geral das páginas */
+body {
+  background: var(--color-light_green);
+  color: var(--color-dark_green);
+}
+
+/* Botão fundo verde escuro */
+.btn-bg_green_dark {
+  @apply max-w-[500px] h-[40px] bg-dark_green
+         text-light_green rounded-md font-normal text-xl
+         flex items-center justify-center gap-3 
+         shadow-sm cursor-pointer;
+}
+
+.btn-bg_green_dark_small {
+  @apply w-[100px] h-[40px] bg-dark_green
+         text-light_green rounded-md font-normal text-xl
+         flex items-center justify-center gap-3 
+         shadow-sm cursor-pointer;
+}
+
+/* Botão fundo verde claro */
+.btn-bg_green_light {
+  @apply max-w-[500px] h-[40px] bg-white 
+         text-dark_green flex items-center 
+         justify-center gap-3 
+         border border-dark_green
+         rounded-md font-normal text-xl cursor-pointer;
+}
+
+/*  Botão com ícone */
+.btn-with-icon {
+  @apply w-[220px] h-[40px] 
+         bg-dark_green 
+         text-light_green 
+         flex items-center justify-start gap-3 
+         rounded-md px-4 
+         font-normal text-lg cursor-pointer;
+}
+
+/* Estilo base para todos inputs reutilizáveis */
+.input-base {
+  @apply w-[500px] rounded-sm bg-white  
+  py-1.5 pl-11 pr-11 text-lg font-poppins;
+}
+
+.input-wrapper {
+  @apply relative w-full flex items-center font-poppins;
+}
+
+.input-icon-start {
+  @apply absolute left-3 flex items-center;
+}
+
+.input-icon-end {
+  @apply absolute right-3 flex items-center cursor-pointer;
+}
+
+.input-label {
+  @apply block text-lg mb-1 font-poppins;
+}
+
+.input-base::placeholder {
+  @apply font-poppins;
+}
+
+
+/* Screen reader only - visually hidden but accessible to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Custom scrollbar styles */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(218, 246, 244, 0.3);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(218, 246, 244, 0.5);
+}
+
+/* Firefox scrollbar */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(218, 246, 244, 0.3) transparent;
+}
+
+/* Icon filter to make SVG icons white/light green */
+.icon-light {
+  filter: brightness(0) saturate(100%) invert(98%) sepia(8%) saturate(1015%) hue-rotate(118deg) brightness(103%) contrast(93%);
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-in-out forwards;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

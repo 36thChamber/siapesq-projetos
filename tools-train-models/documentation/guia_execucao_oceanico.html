@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guia de Execução — Pipeline Oceânico (SDM marinho)</title>
+<style>
+  :root {
+    --azul: #0b5394; --azul-claro: #e8f1fa; --tinta: #1f2a36; --cinza: #5b6b7b;
+    --borda: #d7e0ea; --fundo: #f7fafc; --verde: #1e7d46; --ambar: #9a6700;
+    --vermelho: #b3261e; --mono: Consolas, "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0 0 4rem; background: var(--fundo); color: var(--tinta);
+    font: 16px/1.6 "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  }
+  header {
+    background: var(--azul); color: #fff; padding: 2rem 1.5rem 1.6rem;
+  }
+  header h1 { margin: 0 0 .35rem; font-size: 1.6rem; }
+  header p { margin: 0; opacity: .9; max-width: 60rem; }
+  main { max-width: 60rem; margin: 0 auto; padding: 0 1.25rem; }
+  h2 {
+    color: var(--azul); font-size: 1.25rem; margin: 2.4rem 0 .8rem;
+    border-bottom: 2px solid var(--borda); padding-bottom: .3rem;
+  }
+  h3 { font-size: 1.05rem; margin: 1.4rem 0 .5rem; }
+  .passo {
+    display: inline-block; background: var(--azul); color: #fff; border-radius: 50%;
+    width: 1.7rem; height: 1.7rem; line-height: 1.7rem; text-align: center;
+    font-weight: 700; margin-right: .5rem; font-size: .95rem;
+  }
+  pre {
+    background: #10222f; color: #e6eef5; border-radius: 8px; padding: .9rem 1.1rem;
+    overflow-x: auto; font-family: var(--mono); font-size: .88rem; line-height: 1.55;
+  }
+  code { font-family: var(--mono); font-size: .9em; background: var(--azul-claro);
+         padding: .08em .35em; border-radius: 4px; }
+  pre code { background: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: .8rem 0 1.2rem;
+          background: #fff; font-size: .93rem; }
+  .rolagem { overflow-x: auto; }
+  th, td { border: 1px solid var(--borda); padding: .5rem .7rem; text-align: left;
+           vertical-align: top; }
+  th { background: var(--azul-claro); color: var(--azul); }
+  .cartao {
+    background: #fff; border: 1px solid var(--borda); border-left: 5px solid var(--azul);
+    border-radius: 6px; padding: .8rem 1rem; margin: 1rem 0;
+  }
+  .cartao.ok    { border-left-color: var(--verde); }
+  .cartao.aviso { border-left-color: var(--ambar); }
+  .cartao.erro  { border-left-color: var(--vermelho); }
+  .cartao b:first-child { display: block; margin-bottom: .2rem; }
+  .rotulo { display: inline-block; border-radius: 4px; padding: .05em .5em;
+            font-size: .8rem; font-weight: 600; }
+  .rotulo.py { background: #fff3cd; color: #7a5b00; }
+  .rotulo.r  { background: #dbeafe; color: #1e40af; }
+  small.dica { color: var(--cinza); }
+  footer { max-width: 60rem; margin: 3rem auto 0; padding: 0 1.25rem;
+           color: var(--cinza); font-size: .85rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Guia de Execução — Pipeline Oceânico (SDM marinho)</h1>
+  <p>Um comando roda tudo: ocorrências &rarr; pseudo-ausências no oceano &rarr; variáveis do
+     mar (CMEMS) &rarr; controle de qualidade &rarr; Random Forest em
+     <span class="rotulo py">Python</span> e/ou <span class="rotulo r">R</span> &rarr; mapa
+     anual de validação. Espécie de referência: <i>Pomatomus saltatrix</i>.</p>
+</header>
+<main>
+
+<h2><span class="passo">1</span>Preparação (uma vez só)</h2>
+<ul>
+  <li><b>Abra o terminal na raiz do projeto</b>
+      (<code>C:\Users\user\Documents\Projetos\tools-train-models</code>).
+      O projeto assume que tudo roda a partir da raiz.</li>
+  <li><b>Use o Python do projeto</b>: sempre <code>.venv\Scripts\python.exe</code>
+      (não o Python global).</li>
+  <li><b>Batimetria</b>: confira que <code>dados_entrada\ocean_depth.nc</code> existe
+      (já vem no projeto; um GEBCO pode ser usado no lugar via <code>--batimetria</code>).</li>
+  <li><b>Credenciais do Copernicus Marine (CMEMS)</b> no arquivo <code>.env</code>
+      — necessárias para baixar temperatura/salinidade/clorofila.
+      <b>Nunca</b> enviar o <code>.env</code> para o git.</li>
+  <li><b>R (opcional)</b>: só para <code>--engine r</code> ou <code>ambos</code>.
+      Precisa do <code>Rscript.exe</code> (achado sozinho em
+      <code>C:\Program Files\R\R-*</code>) com o pacote <code>randomForest</code>.</li>
+</ul>
+
+<h2><span class="passo">2</span>Ver o plano antes de rodar (custo zero)</h2>
+<p>O <code>--dry_run</code> imprime cada comando que seria executado e os caminhos dos
+arquivos, sem baixar nem calcular nada. Use sempre antes de uma rodada de verdade.</p>
+<pre><code>.venv\Scripts\python.exe run_pipeline_ocean.py --dry_run</code></pre>
+
+<h2><span class="passo">3</span>O comando único</h2>
+<pre><code>.venv\Scripts\python.exe run_pipeline_ocean.py --especie "Pomatomus saltatrix" --seed 42</code></pre>
+<p>Por padrão ele roda as 6 etapas com <code>--engine ambos</code> (Python + R + comparação)
+no domínio do Atlântico Sul, e grava tudo em
+<code>07 Executado por espécie\Pomatomus_saltatrix\</code>.</p>
+
+<h3>Escolhendo o motor da modelagem (<code>--engine</code>)</h3>
+<pre><code>:: só Python (scikit-learn)
+.venv\Scripts\python.exe run_pipeline_ocean.py --engine python
+
+:: só R (randomForest)
+.venv\Scripts\python.exe run_pipeline_ocean.py --engine r
+
+:: os dois + comparação Python x R ao final (padrão)
+.venv\Scripts\python.exe run_pipeline_ocean.py --engine ambos</code></pre>
+
+<div class="cartao">
+  <b>Como o R e o Python conversam</b>
+  Para a comparação ser justa, o R treina nas <b>mesmas linhas</b> que o Python
+  (arquivo <code>*_dados_split.csv</code>) e prediz nas <b>mesmas células</b> do mapa
+  (arquivo <code>*_gridX.csv</code>). Esses dois arquivos são criados pelo caminho Python.
+  Se você pedir <code>--engine r</code> e eles ainda não existirem, o orquestrador roda o
+  passo Python correspondente automaticamente e avisa na tela — é esperado, não é erro.
+</div>
+
+<h3>Outros exemplos úteis</h3>
+<pre><code>:: retomar da modelagem (dados já capturados), só R
+.venv\Scripts\python.exe run_pipeline_ocean.py --engine r --start modelo
+
+:: parar no controle de qualidade (sem treinar)
+.venv\Scripts\python.exe run_pipeline_ocean.py --stop qc
+
+:: domínio global (quando o Atlântico Sul rende poucas presenças)
+.venv\Scripts\python.exe run_pipeline_ocean.py --bbox -180 -90 180 90
+
+:: injetar um CSV de ocorrências pronto (pula o download)
+.venv\Scripts\python.exe run_pipeline_ocean.py --occ_csv caminho\dados.csv</code></pre>
+
+<h2><span class="passo">4</span>Etapas e saídas</h2>
+<div class="rolagem">
+<table>
+  <tr><th>#</th><th>Etapa</th><th>O que faz</th><th>Saída principal</th></tr>
+  <tr><td>1</td><td><code>occ</code></td>
+      <td>Baixa e limpa ocorrências de 7 fontes marinhas
+          (<code>config_marinho.yaml</code>)</td>
+      <td><code>Occurrence_&lt;Especie&gt;_DD_MM_AA.csv</code></td></tr>
+  <tr><td>2</td><td><code>pseudo</code></td>
+      <td>Tira pontos em terra (batimetria) e sorteia pseudo-ausências
+          <b>só no oceano</b>, na faixa de profundidade das presenças</td>
+      <td><code>Pseudoabsence_*.csv</code> + <code>Map_*.png</code></td></tr>
+  <tr><td>3</td><td><code>captura</code></td>
+      <td>Anexa <code>sst</code>, <code>sss</code>, <code>chl</code>
+          (+ <code>chl_log10</code>) do <b>dia</b> de cada registro (CMEMS)
+          e a <code>profundidade</code></td>
+      <td><code>&lt;Especie&gt;_variables_marinho_&lt;data&gt;\Variables_*.csv</code></td></tr>
+  <tr><td>4</td><td><code>qc</code></td>
+      <td>Portão de qualidade: <b>APTO</b>/<b>REVISAR</b> seguem;
+          <b>NAO_APTO</b> interrompe o pipeline</td>
+      <td><code>QCVeredito_*.json/.txt</code></td></tr>
+  <tr><td>5</td><td><code>modelo</code></td>
+      <td>Random Forest <span class="rotulo py">Python</span> e/ou
+          <span class="rotulo r">R</span> (mesmo split; métricas AUC/TSS/MCC…)</td>
+      <td><code>modelo_rf_marinho\rf_*_marinho.joblib</code> /
+          <code>_R.rds</code> + <code>*_eval.json</code></td></tr>
+  <tr><td>6</td><td><code>predicao</code></td>
+      <td>Mapa anual de validação (média 2015-2024 do oceano);
+          com <code>ambos</code>, fecha com a comparação Python&times;R</td>
+      <td><code>pred_*_adequabilidade.tif/.png</code> +
+          <code>comparacao_py_r_*.txt/.json</code> +
+          <code>comparacao_mapas_*.png</code></td></tr>
+</table>
+</div>
+<p><small class="dica">Tudo fica em <code>07 Executado por espécie\&lt;Genero_especie&gt;\</code>,
+na convenção de nomes do projeto (<code>naming.py</code>). As etapas 3 e 6 têm cache em
+<code>dados_saida\</code> e continuam de onde pararam se a rodada cair.</small></p>
+
+<h2><span class="passo">5</span>Solução de problemas</h2>
+
+<div class="cartao erro">
+  <b>"[GATE] QC marinho: veredito NAO_APTO — pipeline interrompido"</b>
+  Não é defeito: o portão de qualidade barrou o conjunto de dados (menos de 100 presenças,
+  menos de 100 casos completos ou variável degenerada). Leia o motivo em
+  <code>QCVeredito_*.txt</code>. Saída comum: alargar o domínio com
+  <code>--bbox -180 -90 180 90</code> e rodar de novo desde o início.
+</div>
+
+<div class="cartao erro">
+  <b>"Rscript não encontrado"</b>
+  Instale o R (com o pacote <code>randomForest</code>) ou informe o caminho:
+  <code>--rscript "C:\Program Files\R\R-4.x.x\bin\Rscript.exe"</code>.
+  Se não precisa do R, use <code>--engine python</code>.
+</div>
+
+<div class="cartao aviso">
+  <b>Falha de download do CMEMS (etapas 3 e 6)</b>
+  Confira as credenciais no <code>.env</code> e a internet, e rode o mesmo comando de novo
+  — o cache faz a captura retomar do ponto em que parou
+  (<code>dados_saida\cmarine\</code> e <code>dados_saida\pred_marinho_cache\</code>).
+</div>
+
+<div class="cartao aviso">
+  <b>Aviso "apenas N presenças (&lt; 100)" após a etapa 1</b>
+  O pipeline continua, mas o QC (etapa 4) vai bloquear. Antecipe-se: rode com
+  <code>--bbox</code> maior ou confira a grafia do nome científico.
+</div>
+
+<div class="cartao ok">
+  <b>Quero repetir só uma parte</b>
+  <code>--start modelo</code> reusa o <code>Variables_*.csv</code> já capturado e treina de
+  novo; <code>--start predicao</code> refaz só o mapa; <code>--stop captura</code> para no
+  CSV de treino. O <code>--dry_run</code> mostra o que cada combinação faria.
+</div>
+
+<div class="cartao ok">
+  <b>Reprodutibilidade</b>
+  Repetir o comando com o mesmo <code>--seed</code> gera as mesmas pseudo-ausências e o
+  mesmo split de treino/teste.
+</div>
+
+</main>
+<footer>
+  Rotina oceânica do projeto tools-train-models — detalhes completos em
+  <code>documentation\rotina_oceanica.md</code>. Orquestrador:
+  <code>run_pipeline_ocean.py</code> (raiz do projeto).
+</footer>
+</body>
+</html>

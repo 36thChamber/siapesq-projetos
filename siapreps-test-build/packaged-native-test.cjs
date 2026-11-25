@@ -1,0 +1,1 @@
+const path=require('path'); const base=path.resolve('dist-private/win-unpacked/resources/app.asar'); const pkg=require(path.join(base,'package.json')); const DB=require(path.join(base,'node_modules/better-sqlite3'));const db=new DB(':memory:');console.log(pkg.name,pkg.version,db.prepare('select 1 as ok').get());db.close();console.log('native runtime',process.versions.electron);

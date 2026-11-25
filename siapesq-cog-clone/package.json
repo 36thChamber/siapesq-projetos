@@ -1,0 +1,58 @@
+{
+  "name": "SIAPESQ",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "predev": "node scripts/verify-next-install.cjs",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "node scripts/start-standalone.cjs",
+    "lint": "eslint .",
+    "test": "node --test scripts/*.test.cjs scripts/backup/*.test.cjs && vitest run",
+    "test:e2e": "playwright test",
+    "typecheck": "next typegen && tsc --noEmit",
+    "dev:staging": "node scripts/dev-staging.cjs",
+    "start:staging": "node scripts/start-staging.cjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1168.0",
+    "@aws-sdk/s3-request-presigner": "3.1168.0",
+    "@turf/turf": "^7.3.5",
+    "axios": "^1.11.0",
+    "colormap": "^2.3.2",
+    "encoding": "^0.1.13",
+    "geotiff": "3.0.5",
+    "isomorphic-dompurify": "^3.19.0",
+    "leaflet": "^1.9.4",
+    "next": "16.4.6",
+    "proj4": "2.23.0",
+    "proj4-fully-loaded": "0.2.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-leaflet": "5.0.0",
+    "react-markdown": "^10.1.0",
+    "sharp": "0.35.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.0",
+    "@testing-library/react": "^16.3.3",
+    "@types/leaflet": "^1.9.21",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "axios-mock-adapter": "^2.1.0",
+    "esbuild": "0.28.2",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "16.4.6",
+    "jsdom": "^29.1.1",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5",
+    "vite": "^8.0.0",
+    "vitest": "5.1.0"
+  },
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
+  }
+}

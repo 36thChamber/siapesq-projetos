@@ -1,0 +1,123 @@
+/* .index {
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: row;
+    justify-content:flex-end;
+    flex:1;
+  }
+  
+ .div {
+    background-color: #ffffff;
+    height: 100vh;
+    position: relative;
+    width: 100vw;
+  }
+  
+ .group {
+    height: 196px;
+    left: 174px;
+    position: absolute;
+    top: 150px;
+    width: 308px;
+  }
+  
+ .group-2 {
+    height: 196px;
+    position: relative;
+    width: 312px;
+    margin-top: 5em;
+  }
+  
+ .text-wrapper {
+    color: #3e3e3e;
+    font-family: "Poppins-Bold";
+    font-size: 24px;
+    left: 77px;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    top: 0;
+  }
+  
+ .p {
+    color: #3e3e3e;
+    font-family: "Poppins-Light";
+    font-size: 14px;
+    left: 0;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    text-align: center;
+    top: 40px;
+    margin-bottom: 1em;
+    width: 308px;
+  }
+  
+ .overlap-group-wrapper {
+    height: 45px;
+    left: 0;
+    position: absolute;
+    top: 88px;
+    width: 310px;
+  }
+  
+ .overlap-group {
+    background-color: #ffffff;
+    border: 1px solid;
+    border-radius: 10px;
+    height: 45px;
+    position: relative;
+    width: 308px;
+  }
+  
+ .text-wrapper-2 {
+    color: #00000080;
+    font-family: "Poppins-Regular";
+    font-size: 14px;
+    font-weight: 400;
+    left: 19px;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    top: 14px;
+    white-space: nowrap;
+    width: 50px;
+  }
+  
+ .overlap-wrapper {
+    height: 45px;
+    left: 0;
+    position: absolute;
+    top: 151px;
+    width: 310px;
+  }
+  
+ .overlap {
+    background-color: #2d81af;
+    border-radius: 10px;
+    height: 45px;
+    position: relative;
+    width: 308px;
+  }
+  
+ .text-wrapper-3 {
+    color: #ffffff;
+    font-family: "Roboto-Bold";
+    font-size: 16px;
+    font-weight: 700;
+    left: 109px;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    top: 14px;
+    white-space: nowrap;
+    width: 92px;
+  }
+  
+  .Logo {
+    height: 100px;
+    left: 30px;
+    position: absolute;
+    top: -5em;
+    width: 250px;
+  } */

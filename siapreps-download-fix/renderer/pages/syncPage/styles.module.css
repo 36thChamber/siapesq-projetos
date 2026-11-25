@@ -1,0 +1,41 @@
+.splash-screen {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #ffffff;
+    zoom:95%;
+  }
+  
+  .loader {
+    display:block;
+    top:0;
+    margin:25px;
+    margin-left:90%;
+    position:absolute;
+    border:8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 2s linear infinite;
+    margin-bottom: 16px;
+  }
+  .Logo{
+  height: 200px;
+  position: fixed;
+    text-align: center;
+  top: 30%;
+  width: 600px;
+}
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .SIM{
+    width: 30px;
+  }
+  

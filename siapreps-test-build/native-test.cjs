@@ -1,0 +1,1 @@
+const Database=require('better-sqlite3');const db=new Database(':memory:');console.log('sqlite native OK',db.prepare('select 1 as value').get().value);db.close();console.log('serialport module OK',!!require('serialport').SerialPort);console.log('electron',process.versions.electron);

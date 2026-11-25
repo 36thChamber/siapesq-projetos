@@ -1,0 +1,1 @@
+# Provider pangaea (esqueleto preparado).

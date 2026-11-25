@@ -1,0 +1,8 @@
+{
+  "name": "siapesq-monitor-mapa",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": { "check": "node sonda.mjs", "test": "node --test sonda.test.mjs" },
+  "dependencies": { "playwright": "1.61.0" }
+}

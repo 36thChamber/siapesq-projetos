@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia do Colaborador — Rotina por Grupo Taxonômico</title>
+<style>
+  :root{
+    --tinta:#1f2933; --suave:#52606d; --fundo:#fbfcfd; --cartao:#ffffff;
+    --borda:#d9e2ec; --realce:#0b6e4f; --realce-claro:#e6f4ef;
+    --aviso:#8a5a00; --aviso-fundo:#fff7e6; --erro:#a02c2c; --erro-fundo:#fdecec;
+    --codigo-fundo:#0f172a; --codigo-tinta:#e2e8f0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fundo);color:var(--tinta);
+       font:16px/1.65 "Segoe UI",system-ui,-apple-system,sans-serif}
+  .pagina{max-width:980px;margin:0 auto;padding:40px 28px 80px}
+  header{border-bottom:3px solid var(--realce);padding-bottom:18px;margin-bottom:30px}
+  h1{font-size:1.8rem;margin:0 0 6px;color:var(--realce)}
+  .subtitulo{color:var(--suave);font-size:1.02rem;margin:0}
+  h2{font-size:1.3rem;margin:44px 0 12px;padding-top:10px;border-top:1px solid var(--borda);color:var(--tinta)}
+  h2 .num{color:var(--realce);margin-right:8px}
+  h3{font-size:1.05rem;margin:26px 0 8px}
+  p{margin:10px 0}
+  code{background:#eef2f6;border:1px solid var(--borda);border-radius:4px;
+       padding:1px 6px;font:0.88em/1.5 Consolas,"Cascadia Code",monospace}
+  pre{background:var(--codigo-fundo);color:var(--codigo-tinta);border-radius:8px;
+      padding:16px 18px;overflow-x:auto;font:0.86rem/1.6 Consolas,"Cascadia Code",monospace}
+  pre code{background:none;border:none;color:inherit;padding:0}
+  pre .c{color:#7dd3a8}
+  table{border-collapse:collapse;width:100%;margin:14px 0;background:var(--cartao);
+        font-size:0.92rem}
+  th,td{border:1px solid var(--borda);padding:8px 11px;text-align:left;vertical-align:top}
+  th{background:var(--realce-claro);color:var(--realce);font-weight:600}
+  tr:nth-child(even) td{background:#f7fafc}
+  .caixa{border-left:4px solid var(--realce);background:var(--realce-claro);
+         border-radius:0 8px 8px 0;padding:12px 16px;margin:16px 0}
+  .caixa.aviso{border-color:var(--aviso);background:var(--aviso-fundo);color:var(--aviso)}
+  .caixa.erro{border-color:var(--erro);background:var(--erro-fundo);color:var(--erro)}
+  .etiqueta{display:inline-block;border-radius:20px;padding:1px 10px;font-size:0.78rem;
+            font-weight:600;white-space:nowrap}
+  .ok{background:var(--realce-claro);color:var(--realce)}
+  .atencao{background:var(--aviso-fundo);color:var(--aviso)}
+  .bloqueio{background:var(--erro-fundo);color:var(--erro)}
+  ol li,ul li{margin:6px 0}
+  .rodape{margin-top:50px;padding-top:14px;border-top:1px solid var(--borda);
+          color:var(--suave);font-size:0.85rem}
+  a{color:var(--realce)}
+</style>
+</head>
+<body>
+<div class="pagina">
+
+<header>
+  <h1>Guia do Colaborador — Trocando a rotina por GRUPO taxonômico</h1>
+  <p class="subtitulo">Como rodar o pipeline SDM para grupos diferentes de mamíferos usando o
+  sistema de perfis (<code>--perfil</code>). Complementa o <code>GUIA_DO_COLABORADOR.md</code>
+  (operação geral) e o <code>manual_parametros_grupos.md</code> (racional científico).
+  · tools-train-models · agosto/2026</p>
+</header>
+
+<div class="caixa">
+<strong>TL;DR — 3 passos</strong>
+<pre><code><span class="c"># 1. Escolha o perfil do grupo e rode UMA espécie piloto até a modelagem:</span>
+.venv/Scripts/python.exe run_pipeline.py --especie "Ramphastos toco" --perfil aves --seed 42
+
+<span class="c"># 2. Valide: OccurrenceReport, nº de presenças pós-limpeza, laudo QC, AUC/TSS.</span>
+
+<span class="c"># 3. Aprovou? Rode as demais espécies e depois os 17 cenários de predição:</span>
+.venv/Scripts/python.exe run_predicoes_cenarios.py --especie "Ramphastos toco"</code></pre>
+O <code>--perfil</code> faz a troca da rotina: preenche as flags recomendadas para o grupo
+(raio de pseudoausência, Área M, janela temporal, amplitudes sazonais, YAML de limpeza).
+<strong>Flag passada explicitamente na linha de comando sempre vence o perfil.</strong>
+</div>
+
+<h2><span class="num">1.</span>O que o perfil troca, exatamente</h2>
+<p>Ao passar <code>--perfil &lt;grupo&gt;</code>, o carregador (<code>perfil.py</code>) lê
+<code>perfis/&lt;grupo&gt;.yaml</code> e ajusta quatro camadas da rotina de uma vez:</p>
+<table>
+<tr><th>Camada</th><th>O que muda</th><th>Exemplo (aves)</th></tr>
+<tr><td><strong>Pseudoausências</strong> (etapa 2)</td><td>raio de exclusão e tamanho da Área M</td><td>raio 20 km, Área M 300 km</td></tr>
+<tr><td><strong>Captação + limpeza</strong> (etapa 1)</td><td>janela temporal e o bloco <code>cleaning:</code> do grupo</td><td><code>min_year 2010</code>, thinning 5 km via <code>config_aves.yaml</code></td></tr>
+<tr><td><strong>Variáveis ambientais</strong> (etapa 3)</td><td>amplitudes sazonais e uso do solo</td><td><code>com_amplitudes</code> ligado</td></tr>
+<tr><td><strong>Avisos e limites</strong></td><td>imprime as notas do manual, inclusive o que ainda <em>REQUER IMPLEMENTAÇÃO</em></td><td>“migratórias precisam de filtro sazonal”</td></tr>
+</table>
+<p>A cada rodada o perfil imprime o que aplicou (<code>[perfil] aplicado: …</code>) e o que
+manteve da sua linha de comando — nada acontece em silêncio.</p>
+
+<h2><span class="num">2.</span>Os perfis disponíveis</h2>
+<table>
+<tr><th>Perfil</th><th>Raio pseudo</th><th>Área M</th><th>Amplitudes</th><th>Limpeza específica</th><th>Status</th></tr>
+<tr><td><code>mamiferos</code></td><td>10 km</td><td>200 km</td><td>opt-in</td><td>padrão (thinning 1 km, mesma data)</td><td><span class="etiqueta ok">produção</span> calibrado nos primatas do STE</td></tr>
+<tr><td><code>aves</code></td><td>20 km</td><td>300 km</td><td>ligadas</td><td>thinning 5 km qualquer-data; <code>min_year</code> 2010</td><td><span class="etiqueta ok">produção</span> para <strong>residentes</strong></td></tr>
+<tr><td><code>insetos</code></td><td>5 km</td><td>100 km</td><td>ligadas</td><td>thinning 2 km qualquer-data</td><td><span class="etiqueta ok">produção</span> baseline</td></tr>
+<tr><td><code>plantas</code></td><td>5 km</td><td>100 km</td><td>ligadas</td><td>aceita data incompleta de herbário</td><td><span class="etiqueta ok">produção</span> só modo climatológico</td></tr>
+<tr><td><code>repteis</code></td><td>5 km</td><td>150 km</td><td>ligadas</td><td>thinning 1 km qualquer-data</td><td><span class="etiqueta ok">produção</span> baseline</td></tr>
+<tr><td><code>peixes_agua_doce</code></td><td>5 km</td><td>sem ecorregião</td><td>—</td><td><code>habitat: any</code></td><td><span class="etiqueta atencao">rascunho exploratório</span></td></tr>
+<tr><td><code>peixes_marinhos</code></td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="etiqueta bloqueio">redireciona</span> p/ <code>run_pipeline_ocean.py</code></td></tr>
+</table>
+<p>Detalhes e racional: <code>perfis/README.md</code> e a seção do grupo no
+<code>manual_parametros_grupos.md</code>.</p>
+
+<h2><span class="num">3.</span>Passo a passo completo para um grupo novo</h2>
+
+<h3>3.1 Antes da primeira rodada</h3>
+<ol>
+<li><strong>Ambiente</strong>: venv com <code>requirements.txt</code> + R com o pacote
+<code>sdm</code> (igual a qualquer rodada).</li>
+<li><strong>Credenciais no <code>.env</code></strong>: confira as fontes que importam ao grupo —
+<strong>aves dependem do token do eBird</strong> (sem ele a fonte falha graciosamente e o
+pipeline segue com as demais, mas o conjunto empobrece). Plantas se beneficiam de
+SpeciesLink/BIEN; o GBIF serve a todos.</li>
+<li><strong>Leia a seção do grupo no manual</strong> (5 min) — em especial o número mínimo de
+registros e as notas de <em>REQUER IMPLEMENTAÇÃO</em>, para saber o que a rodada NÃO cobre.</li>
+</ol>
+
+<h3>3.2 Rodada piloto (sempre!)</h3>
+<p>Rode <strong>uma espécie representativa</strong> até a modelagem antes de escalar:</p>
+<pre><code>.venv/Scripts/python.exe run_pipeline.py --especie "&lt;Genero especie&gt;" --perfil &lt;grupo&gt; --seed 42</code></pre>
+<p>A saída fica em <code>07 Executado por espécie/&lt;Genero_especie&gt;/&lt;data&gt;/</code>.
+Valide, nesta ordem:</p>
+<ol>
+<li><strong><code>OccurrenceReport_*.json</code></strong> — registros por fonte, remoções da
+limpeza (<code>removed_by</code>) e as <code>top_keys</code> do dedup (nenhuma remoção em
+massa deve passar sem explicação).</li>
+<li><strong>Nº de presenças pós-limpeza</strong> ≥ mínimo do grupo (manual). Thinning agressivo
+(insetos/aves) derruba muito — é esperado.</li>
+<li><strong><code>Map_*.png</code></strong> — pseudoausências fazem sentido geográfico?
+(dentro da Área M, não coladas nas presenças)</li>
+<li><strong>Laudo QC</strong> (<code>QC_*.html</code>) — SDM Readiness Score e correlações.</li>
+<li><strong><code>*_eval.html</code></strong> — AUC/TSS do RF (bootstrap ×10).</li>
+</ol>
+
+<h3>3.3 Escalar e predizer</h3>
+<pre><code>.venv/Scripts/python.exe run_predicoes_cenarios.py --especie "&lt;Genero especie&gt;"</code></pre>
+<p>Cada cenário sai com o <strong>teste de coerência ecológica</strong>
+(<code>*_coerencia.json</code>) — só use mapas <code>APROVADO</code>;
+<code>SUSPEITO</code>/<code>REPROVADO</code> pedem ressalva explícita ou revisão do desenho.
+Figuras/GIFs: <code>05_utils/figuras_cenarios.py --especie ...</code>.</p>
+
+<h2><span class="num">4.</span>Sobrescrevendo o perfil (quando precisar)</h2>
+<p>A linha de comando sempre vence — nas duas formas (<code>--flag valor</code> e
+<code>--flag=valor</code>):</p>
+<pre><code><span class="c"># inseto de dispersão maior: raio de 10 km em vez dos 5 do perfil</span>
+... --perfil insetos --radius_km 10
+
+<span class="c"># ave com poucos dados: reabrir a janela temporal que o perfil encurta para 2010</span>
+... --perfil aves --min_year 2000
+
+<span class="c"># usar um YAML de limpeza próprio no lugar do padrão do grupo</span>
+... --perfil plantas --config 01_data_acquisition/occurrences/meu_config.yaml</code></pre>
+<p>O perfil confirma: <code>mantido da linha de comando (vence o perfil): &lt;flag&gt;</code>.</p>
+
+<h2><span class="num">5.</span>Casos especiais</h2>
+<div class="caixa erro"><strong>Peixes marinhos</strong> — <code>--perfil peixes_marinhos</code>
+bloqueia de propósito e mostra o comando do <code>run_pipeline_ocean.py</code> (batimetria,
+faixa de profundidade e QC marinho próprios). Ver <code>rotina_oceanica.md</code>.</div>
+<div class="caixa aviso"><strong>Peixes de água doce</strong> — o perfil roda, mas com AVISO:
+sem Área M por bacia e máscara de rio (itens 1–2 da seção 9 do manual), o resultado é
+rascunho exploratório, não entrega.</div>
+<div class="caixa aviso"><strong>Aves migratórias</strong> — sem o filtro sazonal
+<code>--months</code> (item 3 da seção 9), o modelo mistura o nicho reprodutivo com o de
+invernada. <strong>Comece por residentes.</strong></div>
+<div class="caixa aviso"><strong>Plantas</strong> — o perfil aceita data incompleta (herbário),
+por isso é <strong>só para o modo climatológico</strong> (padrão). Não combine com
+<code>--modo daily</code>.</div>
+
+<h2><span class="num">6.</span>Criando um perfil para um grupo novo</h2>
+<ol>
+<li>Escreva (ou consulte) a seção do grupo no <code>manual_parametros_grupos.md</code> —
+o perfil é a forma executável do manual, nunca o contrário.</li>
+<li>Copie o YAML mais parecido em <code>perfis/</code> e ajuste <code>descricao</code>,
+<code>flags</code> e <code>notas</code> (as chaves de <code>flags</code> são os
+<code>dest</code> do argparse do <code>run_pipeline.py</code>).</li>
+<li>Se a limpeza muda, crie <code>01_data_acquisition/occurrences/config_&lt;grupo&gt;.yaml</code>
+com <strong>apenas</strong> o bloco <code>cleaning:</code> e as chaves que diferem do padrão
+(o resto herda os defaults).</li>
+<li>Valide sem gastar nada:
+<code>run_pipeline.py --especie "Teste sp" --perfil &lt;novo&gt; --dry_run</code> — confira o
+<code>[perfil] aplicado:</code> e o comando impresso de cada etapa.</li>
+<li>Rode a espécie piloto (§3.2), commite o YAML e atualize a tabela do
+<code>perfis/README.md</code>.</li>
+</ol>
+
+<h2><span class="num">7.</span>Onde aprofundar</h2>
+<ul>
+<li><code>manual_parametros_grupos.md</code> — o racional científico e as referências de cada valor.</li>
+<li><code>PARAMETROS_pipeline.md</code> — todos os botões existentes, etapa por etapa.</li>
+<li><code>perfis/README.md</code> — a matriz resumida dos perfis.</li>
+<li><code>MASTER_DOCUMENTATION.md</code> — o pipeline de ponta a ponta.</li>
+</ul>
+
+<p class="rodape">tools-train-models · sistema de perfis por grupo (commits 1dff1a0/425390e) ·
+guia gerado em 17/08/2026. Versão Markdown: <code>GUIA_DO_COLABORADOR_por_grupo.md</code>.</p>
+
+</div>
+</body>
+</html>

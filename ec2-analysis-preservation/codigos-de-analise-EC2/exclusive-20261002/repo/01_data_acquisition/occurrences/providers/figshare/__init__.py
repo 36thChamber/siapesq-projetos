@@ -1,0 +1,1 @@
+# Provider figshare (esqueleto preparado).

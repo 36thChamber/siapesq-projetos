@@ -1,0 +1,6 @@
+python-dotenv
+rpy2
+copernicusmarine
+netCDF4
+rasterio
+numpy

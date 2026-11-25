@@ -1,0 +1,1 @@
+# Provider vertnet (esqueleto preparado).

@@ -1,0 +1,11 @@
+import rateLimit from "express-rate-limit";
+import { Request, RequestHandler, Response } from "express";
+function emailNormalizado(req: Request): string | null { if (typeof req.body?.email !== "string") return null; const email = req.body.email.trim().toLowerCase(); return email || null; }
+const handlerPadrao = (mensagem: string) => (req: Request, res: Response) => { req.log?.warn({ ip: req.ip, rota: req.originalUrl }, "rate limit atingido"); res.status(429).json({ status: 429, message: mensagem }); };
+type OpcoesLimitador = { windowMs: number; limit: number; mensagem: string; skipSuccessfulRequests?: boolean };
+export function criarLimitadoresPorIpEEmail({ windowMs, limit, mensagem, skipSuccessfulRequests = false }: OpcoesLimitador): [RequestHandler, RequestHandler] { const porIp = rateLimit({ windowMs, limit, standardHeaders: true, legacyHeaders: false, skipSuccessfulRequests, handler: handlerPadrao(mensagem) }); const porEmail = rateLimit({ windowMs, limit, standardHeaders: true, legacyHeaders: false, skipSuccessfulRequests, skip: (req) => emailNormalizado(req) === null, keyGenerator: (req) => emailNormalizado(req)!, handler: handlerPadrao(mensagem) }); return [porIp, porEmail]; }
+export function criarLimitadorPorIp({ windowMs, limit, mensagem, skipSuccessfulRequests = false }: OpcoesLimitador): RequestHandler { return rateLimit({ windowMs, limit, standardHeaders: true, legacyHeaders: false, skipSuccessfulRequests, handler: handlerPadrao(mensagem) }); }
+export const rateLimitLogin = criarLimitadoresPorIpEEmail({ windowMs: 15 * 60 * 1000, limit: 10, skipSuccessfulRequests: true, mensagem: "Muitas tentativas de login. Tente novamente em alguns minutos." });
+export const rateLimitSenha = criarLimitadoresPorIpEEmail({ windowMs: 15 * 60 * 1000, limit: 10, mensagem: "Muitas solicitações de senha. Tente novamente em alguns minutos." });
+export const rateLimitCadastro = criarLimitadorPorIp({ windowMs: 60 * 60 * 1000, limit: 5, mensagem: "Muitas contas criadas a partir deste IP. Tente novamente mais tarde." });
+export const rateLimitEnvioEmail = criarLimitadoresPorIpEEmail({ windowMs: 60 * 60 * 1000, limit: 5, mensagem: "Muitos envios de e-mail. Tente novamente mais tarde." });

@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+# run_predicoes_cenarios.py — Roda os 17 CENÁRIOS de predição de UMA espécie.
+#
+# Para cada pasta de cenário em "predict variables/", projeta o modelo `.sdm` climatológico
+# e grava o mapa de adequabilidade + incerteza + o mapa de EXTRAPOLAÇÃO.
+#
+# Os 17 cenários: 1 anual (validação) + 12 mensais + 4 futuros (2050/2100 × SSP2-4.5/SSP5-8.5).
+#
+# CUSTO: ~27 min por cenário por espécie (medido). 17 cenários ≈ 8 h para uma espécie.
+# RESUMÍVEL: inventaria e valida TIFFs; pergunta se deve retomar, refazer ou cancelar.
+# O driver R reaproveita pares de mapas/faixas completos e publica via TIFF temporário.
+#
+# EXECUTAR DA RAIZ, no venv:
+#   .venv/Scripts/python.exe run_predicoes_cenarios.py --especie "Sapajus nigritus"
+#   .venv/Scripts/python.exe run_predicoes_cenarios.py --especie "Sapajus nigritus" --grupos mensal
+#   .venv/Scripts/python.exe run_predicoes_cenarios.py --especie "Sapajus nigritus" --dry_run
+
+from __future__ import annotations
+
+import argparse
+import glob
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
+import naming  # noqa: E402
+from prediction_state import inspect_scenario, prepare_existing, validate_tif
+
+CENARIOS_DIR = ROOT / "predict variables"
+PREDICT_R = ROOT / "04_modeling" / "run_predict_climatologico.R"
+EXTRAP_PY = ROOT / "04_modeling" / "mapa_extrapolacao.py"
+COERENCIA_PY = ROOT / "04_modeling" / "teste_coerencia_ecologica.py"
+BASE07 = ROOT / "07 Executado por espécie"
+
+
+def _p(m: str = "") -> None:
+    print(m, flush=True)
+
+
+def _banner(t: str) -> None:
+    _p(f"\n{'=' * 78}\n>> {t}\n{'=' * 78}")
+
+
+def _resolve_rscript(explicito: str | None, dry_run: bool) -> str:
+    """O R quase nunca está no PATH no Windows — procura na instalação padrão."""
+    if explicito:
+        return explicito
+    achado = shutil.which("Rscript")
+    if achado:
+        return achado
+    for padrao in (r"C:\Program Files\R\R-*\bin\Rscript.exe",
+                   r"C:\Program Files (x86)\R\R-*\bin\Rscript.exe"):
+        hits = sorted(glob.glob(padrao))
+        if hits:
+            return hits[-1]
+    if dry_run:
+        return "Rscript"
+    raise SystemExit("[ERRO] Rscript não encontrado. Instale o R ou passe --rscript <caminho>.")
+
+
+def achar_modelo(especie: str, model_dir: str | None) -> tuple[Path, str]:
+    """Localiza a pasta do modelo climatológico e o nome do `.sdm`.
+
+    Sem --model_dir, pega o `.sdm` climatológico MAIS RECENTE da espécie: as rodadas ficam
+    em subpastas datadas (2026-07-17/...), e a mais nova é a que vale."""
+    if model_dir:
+        d = Path(model_dir)
+        sdms = sorted(d.glob("*.sdm"))
+        if not sdms:
+            raise SystemExit(f"[ERRO] nenhum .sdm em {d}")
+        return d, sdms[0].stem
+    slug = naming.slug_especie(especie)
+    cands = [p for p in (BASE07 / slug).rglob("*.sdm") if "climatologico" in str(p.parent).lower()]
+    if not cands:
+        raise SystemExit(
+            f"[ERRO] nenhum modelo climatológico (.sdm) para '{especie}' em {BASE07 / slug}.\n"
+            f"  Treine antes: python run_pipeline.py --especie \"{especie}\" --start modelagem")
+    cands.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    escolhido = cands[0]
+    _p(f"[modelo] usando o mais recente: {escolhido.relative_to(ROOT)}")
+    return escolhido.parent, escolhido.stem
+
+
+def listar_cenarios(grupos: list[str], preditores: list[str] | None = None) -> list[Path]:
+    """Pastas de cenário completas (7 camadas). Ignora as que ainda não fecharam —
+    o NDVI mensal e o CMIP6 chegam em tempos diferentes."""
+    if not CENARIOS_DIR.exists():
+        raise SystemExit(
+            f"[ERRO] {CENARIOS_DIR} não existe. Monte antes:\n"
+            f"  python 03_environmental_processing/montar_predict_variables.py")
+    PREDITORES = preditores or ["t2m", "e", "tp", "ndvi", "altitude", "awc", "ocup_solo_mapbiomas"]
+    out = []
+    for d in sorted(CENARIOS_DIR.iterdir()):
+        if not d.is_dir():
+            continue
+        if grupos and d.name.split("_")[0] not in grupos:
+            continue
+        faltam = [c for c in PREDITORES if not (d / f"{c}.tif").exists()]
+        if faltam:
+            _p(f"[cenário] {d.name}: INCOMPLETO (faltam {', '.join(faltam)}) — pulando.")
+            continue
+        out.append(d)
+    return out
+
+
+def rodar(especie: str, model_dir: Path, model_name: str, cenarios: list[Path],
+          rscript: str, out_base: Path, dry_run: bool, pular_extrap: bool,
+          existentes: str = "perguntar") -> bool:
+    slug = naming.slug_especie(especie)
+    _p("[inventário] Verificando todos os blocos dos TIFFs existentes; isso pode levar alguns minutos.")
+    states = []
+    for cen in cenarios:
+        _p(f"[verificando] {especie} — {cen.name}")
+        states.append(inspect_scenario(slug, cen.name, out_base, model_dir))
+    if not prepare_existing(states, out_base, existentes, dry_run, _p):
+        return False
+
+    treino_csv = model_dir / "predictor_climatologico.csv"
+    if not treino_csv.exists() and not pular_extrap:
+        _p(f"[aviso] {treino_csv.name} não existe — mapas de extrapolação serão pulados.")
+        pular_extrap = True
+
+    completed = reused = 0
+    failures = []
+    started = time.monotonic()
+    for i, (cen, state) in enumerate(zip(cenarios, states), start=1):
+        scenario_start = time.monotonic()
+        _banner(f"PREDIÇÃO [{i}/{len(cenarios)}] {especie} — {cen.name}")
+        destino = out_base / cen.name
+        out_mean, out_sd = state.mean, state.sd
+        if not dry_run:
+            destino.mkdir(parents=True, exist_ok=True)
+        try:
+            if state.complete and existentes != "overwrite" and out_mean.exists() and out_sd.exists():
+                _p("[pred] Adequabilidade e incerteza já concluídas e validadas — reaproveitando.")
+                reused += 1
+            else:
+                _p(f"[pred] Iniciando/retomando {cen.name}; o R reaproveita as faixas completas disponíveis.")
+                cmd = [rscript, str(PREDICT_R), str(model_dir), model_name,
+                       str(cen), str(out_mean), str(out_sd)]
+                if dry_run:
+                    _p("  [dry-run] predição NÃO executada.")
+                else:
+                    subprocess.run(cmd, cwd=str(ROOT), check=True)
+                    for path in (out_mean, out_sd):
+                        error = validate_tif(path)
+                        if error:
+                            raise RuntimeError(f"saída ausente/inválida: {path}: {error}")
+                    _p(f"[pred] Mapas de {cen.name} finalizados e validados.")
+
+            if not pular_extrap:
+                cmd = [sys.executable, str(EXTRAP_PY), "--cenario", str(cen),
+                       "--treino", str(treino_csv), "--outdir", str(destino),
+                       "--prefixo", f"{slug}_{cen.name}_"]
+                if dry_run:
+                    _p(f"  [dry-run] mapa de extrapolação de {cen.name}")
+                else:
+                    subprocess.run(cmd, cwd=str(ROOT), check=True)
+                    extrap = destino / f"{slug}_{cen.name}_extrapolacao.tif"
+                    error = validate_tif(extrap)
+                    if error:
+                        raise RuntimeError(f"extrapolação inválida: {extrap}: {error}")
+                cmd = [sys.executable, str(COERENCIA_PY), "--mapa", str(out_mean),
+                       "--treino", str(treino_csv),
+                       "--json", str(destino / f"{slug}_{cen.name}_coerencia.json")]
+                if dry_run:
+                    _p(f"  [dry-run] teste de coerência de {cen.name}")
+                else:
+                    subprocess.run(cmd, cwd=str(ROOT), check=True)
+            if dry_run:
+                _p(f"[dry-run] [{i}/{len(cenarios)}] {cen.name} — simulado, sem processamento.")
+            else:
+                completed += 1
+                _p(f"[FINALIZADA {i}/{len(cenarios)}] {especie} — {cen.name} "
+                   f"({time.monotonic() - scenario_start:.1f}s).")
+        except (subprocess.CalledProcessError, OSError, RuntimeError) as exc:
+            failures.append(cen.name)
+            _p(f"[FALHOU {i}/{len(cenarios)}] {cen.name}: {exc}")
+        except KeyboardInterrupt:
+            _p(f"\n[INTERROMPIDO {i}/{len(cenarios)}] {cen.name}. Reinicie o mesmo comando e escolha retomar.")
+            return False
+        if i < len(cenarios):
+            _p(f"[PRÓXIMA {i + 1}/{len(cenarios)}] {especie} — {cenarios[i].name}")
+
+    if dry_run:
+        _banner("SIMULAÇÃO CONCLUÍDA — nenhuma predição executada")
+    else:
+        _banner("LOTE ENCERRADO COM FALHAS" if failures else "PREDIÇÕES CONCLUÍDAS")
+        _p(f"{completed}/{len(cenarios)} cenários finalizados; {reused} pares de mapas reaproveitados; "
+           f"{len(failures)} falhas; tempo total {time.monotonic() - started:.1f}s.")
+        if failures:
+            _p(f"Falharam: {', '.join(failures)}. Execute novamente e escolha retomar.")
+    _p(f"Resultados em: {out_base}")
+    return not failures
+
+
+def main() -> None:
+    p = argparse.ArgumentParser(description="Roda os 17 cenários de predição de uma espécie.")
+    p.add_argument("--especie", required=True)
+    p.add_argument('--perfil', default=None, help='Perfil do cadastro; pode ser explicitado para uma espécie nova.')
+    p.add_argument("--grupos", default="",
+                   help="Subconjunto: anual, mensal, futuro (vírgula). Vazio = todos.")
+    p.add_argument("--model_dir", default=None,
+                   help="Pasta do .sdm. Vazio = o climatológico mais recente da espécie.")
+    p.add_argument("--outdir", default=None,
+                   help="Pasta de saída. Vazio = 07/<Especie>/predicoes_cenarios/.")
+    p.add_argument("--rscript", default=None)
+    p.add_argument("--sem_extrapolacao", action="store_true",
+                   help="Não gerar o mapa de extrapolação de cada cenário.")
+    p.add_argument("--existentes", choices=("perguntar", "retomar", "overwrite", "cancelar"),
+                   default="perguntar",
+                   help="Resultados existentes: pergunta por padrão. retomar autoriza remover TIFFs "
+                        "inválidos após backup; overwrite refaz os cenários selecionados após backup.")
+    p.add_argument("--dry_run", action="store_true")
+    a = p.parse_args()
+
+    from perfil import selecionar_perfil, carregar_perfil
+    from balanceamento import validar_csv_treino
+    try:
+        a.perfil = selecionar_perfil(a.especie, a.perfil)
+        perfil = carregar_perfil(a.perfil)
+    except ValueError as exc:
+        p.error(str(exc))
+    if perfil.get('pipeline') == 'ocean':
+        p.error('Espécies oceânicas usam run_pipeline_ocean.py; os 17 cenários terrestres não se aplicam.')
+
+    grupos = [g.strip() for g in a.grupos.split(",") if g.strip()]
+    model_dir, model_name = achar_modelo(a.especie, a.model_dir)
+    extras = ['t2m_amp','e_amp','tp_amp','ndvi_amp'] if perfil.get('flags',{}).get('com_amplitudes') else []
+    try:
+        preditores = validar_csv_treino(model_dir/'predictor_climatologico.csv', extras)
+    except (OSError, ValueError) as exc:
+        p.error(str(exc))
+    cenarios = listar_cenarios(grupos, preditores)
+    out_base = (Path(a.outdir) if a.outdir
+                else BASE07 / naming.slug_especie(a.especie) / "predicoes_cenarios")
+    rscript = _resolve_rscript(a.rscript, a.dry_run)
+
+    _banner(f"PREDIÇÕES POR CENÁRIO — {a.especie}")
+    _p(f"Modelo    : {model_dir / (model_name + '.sdm')}")
+    _p(f"Cenários  : {len(cenarios)} completos {[c.name for c in cenarios]}")
+    _p(f"Saída     : {out_base}")
+    _p(f"Execução  : {'DRY-RUN' if a.dry_run else 'EXECUÇÃO'}")
+    if not cenarios:
+        raise SystemExit("[ERRO] nenhum cenário completo. Monte as camadas antes.")
+
+    ok = rodar(a.especie, model_dir, model_name, cenarios, rscript, out_base,
+               a.dry_run, a.sem_extrapolacao, a.existentes)
+    if not ok:
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    main()
