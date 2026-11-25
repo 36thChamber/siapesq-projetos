@@ -1,0 +1,15 @@
+{
+  "banco_legado": "exemplo_banco_legado",
+  "banco_plataforma": "exemplo_banco_plataforma",
+  "database_app": "exemplo_database_app",
+  "dono_legado": "exemplo_dono_legado",
+  "dono_plataforma": "exemplo_dono_plataforma",
+  "estado_legado": "exemplo_estado_legado",
+  "prefixo_legado": "exemplo_prefixo_legado",
+  "prefixo_plataforma": "exemplo_prefixo_plataforma",
+  "projeto_legado": "exemplo_projeto_legado",
+  "projeto_plataforma": "exemplo_projeto_plataforma",
+  "schemas_legado": "public, exemplo",
+  "schemas_plataforma": "public, exemplo",
+  "usuario_plataforma": "exemplo_usuario_plataforma"
+}

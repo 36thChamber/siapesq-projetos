@@ -61,6 +61,7 @@ Cópias revisadas do código de aplicações, rotinas ecológicas e ferramentas 
 | [siapresp-ste-integration](siapresp-ste-integration/) | 22 |
 | [ste-predictions-migration](ste-predictions-migration/) | 229 |
 | [ste-s3-private-delivery](ste-s3-private-delivery/) | 3 |
+| [tarefas-avulsas](tarefas-avulsas/) | 44 |
 | [tools-train-models](tools-train-models/) | 200 |
 | [tools-train-models-vireo](tools-train-models-vireo/) | 191 |
 | [vireo-chivi-anual](vireo-chivi-anual/) | 11 |
