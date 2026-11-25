@@ -21,6 +21,7 @@ Cópias revisadas do código de aplicações, rotinas ecológicas e ferramentas 
 | [black-ops](black-ops/) | 477 |
 | [cloud-cleanup](cloud-cleanup/) | 1 |
 | [cog-evaluation-2026-10-20](cog-evaluation-2026-10-20/) | 1 |
+| [consultas-avulsas](consultas-avulsas/) | 7 |
 | [drive-csv-audit-2026-09-16](drive-csv-audit-2026-09-16/) | 1 |
 | [ec2-analysis-preservation](ec2-analysis-preservation/) | 4330 |
 | [ec2-prediction-benchmark](ec2-prediction-benchmark/) | 7 |
